@@ -8,6 +8,8 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.calendar.DetailActivity.Companion.TASK_TEXT
+import java.text.DateFormat
+import java.text.SimpleDateFormat
 
 class TaskAdapter(private val tasks: List<Task>) : RecyclerView.Adapter<TaskViewHolder>()  {
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TaskViewHolder {
@@ -30,7 +32,8 @@ class TaskViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
     private val textView: TextView = itemView.findViewById(R.id.textViewId)
 
     fun bind(task: Task) {
-        textView.text = task.description
+        val time = SimpleDateFormat("HH:mm").format(task.dateAndTime)
+        textView.text = "${time} ${task.name}"
         itemView.setOnClickListener {
             openDetailActivity(itemView.context, task)
         }
@@ -39,7 +42,7 @@ class TaskViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
     private fun openDetailActivity(context: Context, task: Task) {
         val intent = Intent(context, DetailActivity::class.java)
-        intent.putExtra(TASK_TEXT, task.description)
+        intent.putExtra(TASK_TEXT, task.id.toString())
         context.startActivity(intent)
     }
 }
