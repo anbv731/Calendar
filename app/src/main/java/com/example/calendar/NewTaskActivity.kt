@@ -32,29 +32,23 @@ class NewTaskActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_new_task)
         currentDateTime = findViewById(R.id.currentDateTime)
-        setInitialDateTime();
-
-
+        setInitialDateTime()
+        initRealm()
+        realm = Realm.getDefaultInstance()
         textName = findViewById(R.id.editTextTaskName)
         textDescription = findViewById(R.id.editTextTask)
         saveButton = findViewById(R.id.floatingActionButtonSave)
         saveButton.setOnClickListener {
             saveTask()
-            openMainActivity(this)
+            this.finish()
 
         }
 
 
     }
 
-    private fun openMainActivity(context: Context) {
-        val intent = Intent(context, MainActivity::class.java)
-        context.startActivity(intent)
-    }
 
     fun saveTask() {
-        initRealm()
-        realm = Realm.getDefaultInstance()
         newTask.description = textDescription.text.toString()
         newTask.dateAndTime = dateAndTime.getTimeInMillis()
         newTask.date =
@@ -83,7 +77,6 @@ class NewTaskActivity : AppCompatActivity() {
         realm.commitTransaction()
     }
 
-    // отображаем диалоговое окно для выбора даты
     fun setDate(v: View?) {
         DatePickerDialog(
             this@NewTaskActivity, d,
@@ -94,7 +87,6 @@ class NewTaskActivity : AppCompatActivity() {
             .show()
     }
 
-    // отображаем диалоговое окно для выбора времени
     fun setTime(v: View?) {
         TimePickerDialog(
             this@NewTaskActivity, t,
@@ -104,7 +96,6 @@ class NewTaskActivity : AppCompatActivity() {
             .show()
     }
 
-    // установка начальных даты и времени
     private fun setInitialDateTime() {
         currentDateTime.setText(
             DateUtils.formatDateTime(
@@ -116,7 +107,6 @@ class NewTaskActivity : AppCompatActivity() {
         )
     }
 
-    // установка обработчика выбора времени
     var t =
         OnTimeSetListener { view, hourOfDay, minute ->
             dateAndTime.set(Calendar.HOUR_OF_DAY, hourOfDay)
@@ -124,7 +114,6 @@ class NewTaskActivity : AppCompatActivity() {
             setInitialDateTime()
         }
 
-    // установка обработчика выбора даты
     var d =
         OnDateSetListener { view, year, monthOfYear, dayOfMonth ->
             dateAndTime.set(Calendar.YEAR, year)
@@ -132,4 +121,8 @@ class NewTaskActivity : AppCompatActivity() {
             dateAndTime.set(Calendar.DAY_OF_MONTH, dayOfMonth)
             setInitialDateTime()
         }
+    override fun onDestroy() {
+        super.onDestroy()
+        realm.close()
+    }
 }
