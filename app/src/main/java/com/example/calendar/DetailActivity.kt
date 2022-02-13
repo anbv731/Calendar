@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.widget.TextView
 import android.widget.Toolbar
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.gson.Gson
 import io.realm.Realm
 import io.realm.RealmAny
 import io.realm.RealmConfiguration
@@ -44,11 +45,11 @@ class DetailActivity : AppCompatActivity() {
         toolBar.setNavigationOnClickListener{
             this.finish()
         }
+
         buttonDelete.setOnClickListener{
             deletFromDB(task)
             this.finish()
         }
-
 
     }
     private fun initRealm() {

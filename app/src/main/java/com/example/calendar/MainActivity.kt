@@ -66,7 +66,9 @@ class MainActivity : AppCompatActivity() {
     fun setList() {
         val adapter = TaskAdapter(taskList.sortedWith(compareBy({it.dateAndTime})))
         recyclerView.adapter = adapter
-        recyclerView.layoutManager = LinearLayoutManager(this)
+        val layoutManager= LinearLayoutManager(this)
+        layoutManager.canScrollVertically()
+        recyclerView.layoutManager = layoutManager
     }
 
     fun getDate(): String {
