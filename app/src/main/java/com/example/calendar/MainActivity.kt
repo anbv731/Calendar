@@ -3,45 +3,44 @@ package com.example.calendar
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.text.format.DateUtils
-import android.widget.ActionMenuView
-import android.widget.Button
 import android.widget.CalendarView
 import android.widget.TextView
 import androidx.appcompat.view.menu.ActionMenuItemView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.bottomnavigation.BottomNavigationView
 import io.realm.Realm
 import io.realm.RealmChangeListener
 import io.realm.RealmConfiguration
-import io.realm.RealmResults
 import java.text.DateFormat
 import java.util.*
 
 class MainActivity : AppCompatActivity() {
-    lateinit var recyclerView: RecyclerView
-    lateinit var calendarView: CalendarView
-    lateinit var textDate: TextView
-    lateinit var addBottom: ActionMenuItemView
-    lateinit var realm: Realm
-    lateinit var realmChangeListener:RealmChangeListener<Realm>
-    lateinit var taskList: List<Task>
+    private lateinit var recyclerView: RecyclerView
+    private lateinit var calendarView: CalendarView
+    private lateinit var textDate: TextView
+    private lateinit var addButton: ActionMenuItemView
+    private lateinit var realm: Realm
+    private lateinit var realmChangeListener: RealmChangeListener<Realm>
+    private lateinit var taskList: List<Task>
+    private var dateAndTime: Long = 0
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        recyclerView = findViewById<RecyclerView>(R.id.RecyclerViewId)
-        addBottom = findViewById(R.id.addBottom)
-        calendarView = findViewById<CalendarView>(R.id.calendarView)
-        textDate = findViewById<TextView>(R.id.textViewdate)
+        recyclerView = findViewById(R.id.RecyclerViewId)
+        addButton = findViewById(R.id.deleteButton)
+        calendarView = findViewById(R.id.calendarView)
+        textDate = findViewById(R.id.textViewdate)
         initRealm()
         realm = Realm.getDefaultInstance()
         readFromDB(getDate())
-        realmChangeListener = RealmChangeListener<Realm> {setList()}
+        realmChangeListener = RealmChangeListener<Realm> { setList() }
         realm.addChangeListener(realmChangeListener)
         textDate.text = getDate()
+        dateAndTime = calendarView.date
+
+
         setList()
 
         calendarView.setOnDateChangeListener { view, year, monthOfYear, dayOfMonth ->
@@ -51,27 +50,29 @@ class MainActivity : AppCompatActivity() {
             calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth)
             val dateFormatter = DateFormat.getDateInstance(DateFormat.FULL)
             val date = "${dateFormatter.format(calendar.time)}"
-            textDate.text=date
+            dateAndTime = calendar.timeInMillis
+            textDate.text = date
             readFromDB(date)
             setList()
         }
 
-        addBottom.setOnClickListener {
+        addButton.setOnClickListener {
             val intent = Intent(this, NewTaskActivity::class.java)
+            intent.putExtra(NewTaskActivity.IS_EDIT, dateAndTime)
             this.startActivity(intent)
 
         }
     }
 
-    fun setList() {
-        val adapter = TaskAdapter(taskList.sortedWith(compareBy({it.dateAndTime})))
+    private fun setList() {
+        val adapter = TaskAdapter(taskList.sortedWith(compareBy({ it.dateAndTime })))
         recyclerView.adapter = adapter
-        val layoutManager= LinearLayoutManager(this)
+        val layoutManager = LinearLayoutManager(this)
         layoutManager.canScrollVertically()
         recyclerView.layoutManager = layoutManager
     }
 
-    fun getDate(): String {
+    private fun getDate(): String {
         val selectedDate = calendarView.date
         val calendar = Calendar.getInstance()
         calendar.timeInMillis = selectedDate
@@ -85,13 +86,15 @@ class MainActivity : AppCompatActivity() {
         val config = RealmConfiguration.Builder().deleteRealmIfMigrationNeeded().build()
         Realm.setDefaultConfiguration(config)
     }
-    fun readFromDB(date: String) {
+
+    private fun readFromDB(date: String) {
         realm.beginTransaction()
-        val tasksDB=
-            realm.where(Task::class.java).equalTo("date",date).findAll()
+        val tasksDB =
+            realm.where(Task::class.java).equalTo("date", date).findAll()
         realm.commitTransaction()
-        taskList=tasksDB
+        taskList = tasksDB
     }
+
     override fun onDestroy() {
         super.onDestroy()
         realm.removeAllChangeListeners()

@@ -2,5 +2,6 @@
     <string name="app_name">Calendar</string>
 
     <string name="add">Добавить событие</string>
+    <string name="delete">Удалить событие</string>
 
 </resources>

@@ -1,27 +1,26 @@
 package com.example.calendar
 
-import android.content.Context
+
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.TextView
-import android.widget.Toolbar
+import androidx.appcompat.view.menu.ActionMenuItemView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
-import com.google.gson.Gson
 import io.realm.Realm
-import io.realm.RealmAny
 import io.realm.RealmConfiguration
 import io.realm.RealmResults
-import java.text.DateFormat
 import java.text.SimpleDateFormat
 
 class DetailActivity : AppCompatActivity() {
-    lateinit var toolBar: androidx.appcompat.widget.Toolbar
-    lateinit var textDate: TextView
-    lateinit var textDescription: TextView
-    lateinit var buttonDelete: FloatingActionButton
-    lateinit var task: Task
-    lateinit var realm: Realm
+    private lateinit var toolBar: androidx.appcompat.widget.Toolbar
+    private lateinit var textDate: TextView
+    private lateinit var textDescription: TextView
+    private lateinit var buttonEdit: FloatingActionButton
+    private lateinit var deleteButton: ActionMenuItemView
+    private lateinit var task: Task
+    private lateinit var realm: Realm
+
     companion object {
         const val TASK_TEXT = "TASK_TEXT"
 
@@ -30,41 +29,50 @@ class DetailActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_detail)
-        val id=intent?.extras?.getString(TASK_TEXT)
-        textDate=findViewById(R.id.textViewDateDetail)
-        textDescription=findViewById(R.id.textViewDescriptionDetail)
-        toolBar=findViewById(R.id.toolbarDetail)
-        buttonDelete=findViewById(R.id.floatingActionButtonDelete)
+        val id = intent?.extras?.getString(TASK_TEXT)
+        textDate = findViewById(R.id.textViewDateDetail)
+        textDescription = findViewById(R.id.textViewDescriptionDetail)
+        toolBar = findViewById(R.id.toolbarDetail)
+        buttonEdit = findViewById(R.id.floatingActionButtonEdit)
+        deleteButton = findViewById(R.id.deleteButton)
         initRealm()
         realm = Realm.getDefaultInstance()
-        task=readFromDB(id!!)
+        task = readFromDB(id!!)
         val date = SimpleDateFormat("EEEE, d MMMM y HH:mm").format(task.dateAndTime)
-        textDescription.text=task.description
-        textDate.text=date
-        toolBar.title=task.name
-        toolBar.setNavigationOnClickListener{
+        textDescription.text = task.description
+        textDate.text = date
+        toolBar.title = task.name
+        toolBar.setNavigationOnClickListener {
             this.finish()
         }
 
-        buttonDelete.setOnClickListener{
+        deleteButton.setOnClickListener {
             deletFromDB(task)
             this.finish()
         }
+        buttonEdit.setOnClickListener {
+            val intent = Intent(this, NewTaskActivity::class.java)
+            intent.putExtra(NewTaskActivity.IS_EDIT, task.id)
+            this.startActivity(intent)
+        }
 
     }
+
     private fun initRealm() {
         Realm.init(this)
         val config = RealmConfiguration.Builder().deleteRealmIfMigrationNeeded().build()
         Realm.setDefaultConfiguration(config)
     }
-    fun readFromDB(id: String):Task{
+
+    private fun readFromDB(id: String): Task {
 
         realm.beginTransaction()
-        val tasksDB =realm.where(Task::class.java).equalTo("id",id.toInt()).findAll()
+        val tasksDB = realm.where(Task::class.java).equalTo("id", id.toInt()).findAll()
         realm.commitTransaction()
         return tasksDB[0]!!
     }
-    fun deletFromDB(task: Task) {
+
+    private fun deletFromDB(task: Task) {
         realm.beginTransaction()
         val tasksDB: RealmResults<Task> =
             realm.where(Task::class.java).equalTo("id", task.id).findAll()
@@ -76,6 +84,7 @@ class DetailActivity : AppCompatActivity() {
         realm.commitTransaction()
 
     }
+
     override fun onDestroy() {
         super.onDestroy()
         realm.close()

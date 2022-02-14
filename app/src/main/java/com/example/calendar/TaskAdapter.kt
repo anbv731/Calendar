@@ -8,7 +8,6 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.calendar.DetailActivity.Companion.TASK_TEXT
-import java.text.DateFormat
 import java.text.SimpleDateFormat
 
 class TaskAdapter(private val tasks: List<Task>) : RecyclerView.Adapter<TaskViewHolder>()  {

@@ -2,8 +2,8 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:yourapp="http://schemas.android.com/apk/res-auto">
     <item
-        android:id="@+id/addBottom"
-        android:icon="@android:drawable/ic_input_add"
-        android:title="@string/add"
+        android:id="@+id/deleteButton"
+        android:icon="@android:drawable/ic_menu_delete"
+        android:title="@string/delete"
         yourapp:showAsAction="always|collapseActionView" />
 </menu>
